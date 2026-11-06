@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Petualangan EcoLearn - P8RA Kelompok 2</title>
+    <title>EcoLearn: Rimba Lestari - P8RA Kelompok 2</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Font Fredoka untuk kesan Game/Anak-anak -->
@@ -19,15 +19,25 @@
                         sans: ['Fredoka', 'sans-serif'],
                     },
                     colors: {
+                        wood: {
+                            light: '#b45309', // amber-700
+                            DEFAULT: '#92400e', // amber-800
+                            dark: '#78350f', // amber-900
+                            board: '#fef3c7', // amber-50
+                            paper: '#fffbeb' // amber-50 (lighter)
+                        },
+                        leaf: {
+                            light: '#4ade80', // green-400
+                            DEFAULT: '#22c55e', // green-500
+                            dark: '#166534' // green-800
+                        },
+                        earth: {
+                            DEFAULT: '#d97706', // amber-600
+                            dark: '#b45309'
+                        },
                         game: {
-                            blue: '#40C4FF',
-                            green: '#69F0AE',
-                            darkgreen: '#00C853',
-                            yellow: '#FFD740',
-                            orange: '#FFAB40',
-                            red: '#FF5252',
-                            white: '#FFFFFF',
-                            text: '#263238'
+                            red: '#ef4444',
+                            text: '#422006' // Very dark brown for text
                         }
                     }
                 }
@@ -37,33 +47,45 @@
     <style>
         body {
             overscroll-behavior-y: contain; 
-            background-color: #81D4FA;
-            background-image: 
-                radial-gradient(circle at 20% 30%, rgba(255,255,255,0.4) 0%, transparent 10%),
-                radial-gradient(circle at 80% 20%, rgba(255,255,255,0.4) 0%, transparent 15%);
+            background: linear-gradient(135deg, #022c22 0%, #064e3b 100%);
         }
 
-        /* Tombol ala Game 3D */
-        .btn-3d {
+        /* Tombol ala Kayu/Alam 3D */
+        .btn-wood {
             transition: all 0.1s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 6px 0 rgba(0, 0, 0, 0.15);
+            box-shadow: 0 6px 0 rgba(66, 32, 6, 0.5), inset 0 2px 0 rgba(255,255,255,0.2);
             text-transform: uppercase;
             letter-spacing: 1px;
+            border: 2px solid rgba(66, 32, 6, 0.3);
         }
-        .btn-3d:active:not(:disabled) {
+        .btn-wood:active:not(:disabled) {
             transform: translateY(6px);
-            box-shadow: 0 0px 0 rgba(0, 0, 0, 0.15);
+            box-shadow: 0 0px 0 rgba(66, 32, 6, 0.5), inset 0 2px 0 rgba(255,255,255,0.2);
         }
-        .btn-3d:disabled {
-            opacity: 0.5;
+        .btn-wood:disabled {
+            opacity: 0.6;
             cursor: not-allowed;
             transform: none !important;
-            box-shadow: 0 6px 0 rgba(0, 0, 0, 0.15) !important;
-            filter: grayscale(80%);
+            box-shadow: 0 6px 0 rgba(0, 0, 0, 0.3) !important;
+            filter: grayscale(70%);
+        }
+
+        /* Container Kayu */
+        .board-panel {
+            background-color: #fef3c7;
+            border: 6px solid #92400e;
+            box-shadow: inset 0 0 20px rgba(146, 64, 14, 0.2), 0 10px 25px rgba(0,0,0,0.5);
+            background-image: repeating-linear-gradient(
+                45deg,
+                transparent,
+                transparent 10px,
+                rgba(146, 64, 14, 0.03) 10px,
+                rgba(146, 64, 14, 0.03) 20px
+            );
         }
 
         /* Animasi */
-        .screen { display: none; }
+        .screen { display: none; overflow-y: auto; overflow-x: hidden; }
         .screen.active { display: flex; animation: fadeIn 0.4s ease-out forwards; }
         
         @keyframes fadeIn {
@@ -78,200 +100,266 @@
         }
         @keyframes floating {
             0% { transform: translateY(0px); }
-            50% { transform: translateY(-15px); }
+            50% { transform: translateY(-12px); }
             100% { transform: translateY(0px); }
         }
         @keyframes wiggle {
             0%, 100% { transform: rotate(0deg); }
-            25% { transform: rotate(-5deg); }
-            75% { transform: rotate(5deg); }
+            25% { transform: rotate(-6deg); }
+            75% { transform: rotate(6deg); }
         }
         @keyframes pulse-fast {
             0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.1); color: #FF5252; }
+            50% { transform: scale(1.1); color: #ef4444; }
         }
 
         .animate-bounce-in { animation: bounceIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
-        .animate-float { animation: floating 3s ease-in-out infinite; }
-        .animate-wiggle { animation: wiggle 2s ease-in-out infinite; }
+        .animate-float { animation: floating 3.5s ease-in-out infinite; }
+        .animate-wiggle { animation: wiggle 2.5s ease-in-out infinite; }
         .timer-warning { animation: pulse-fast 0.5s infinite; }
 
-        /* Update Screen untuk menampung scroll jika layar sangat kecil (misal HP Landscape) */
-        .screen { display: none; overflow-y: auto; overflow-x: hidden; }
-        .screen.active { display: flex; animation: fadeIn 0.4s ease-out forwards; }
-
-        /* Ornamen Awan di Background */
-        .cloud {
+        /* Animasi Kunang-kunang di Latar */
+        .firefly {
             position: absolute;
-            background: white;
-            border-radius: 50px;
-            opacity: 0.8;
-            animation: moveClouds linear infinite;
-        }
-        .cloud::before, .cloud::after {
-            content: '';
-            position: absolute;
-            background: white;
+            width: 6px;
+            height: 6px;
+            background: #fef08a;
             border-radius: 50%;
+            box-shadow: 0 0 12px 3px #fde047;
+            opacity: 0;
+            animation: floatUp var(--fdur) infinite ease-in-out var(--fdel);
         }
-        @keyframes moveClouds {
-            from { left: -20%; }
-            to { left: 120%; }
+        @keyframes floatUp {
+            0% { transform: translateY(100vh) translateX(0) scale(0); opacity: 0; }
+            20% { opacity: 1; scale: 1; }
+            50% { transform: translateY(50vh) translateX(30px); opacity: 0.8; }
+            80% { opacity: 1; }
+            100% { transform: translateY(-10vh) translateX(-30px) scale(0.5); opacity: 0; }
         }
 
-        /* Scrollbar untuk area panduan */
+        /* Scrollbar tersembunyi */
         .hide-scroll::-webkit-scrollbar { display: none; }
         .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
-<!-- Ubah h-screen menjadi h-[100dvh] agar lebih responsif di mobile browser yang memiliki address bar dinamis -->
 <body class="h-[100dvh] w-[100dvw] overflow-hidden text-game-text flex items-center justify-center relative">
 
-    <!-- Latar Belakang Animasi -->
-    <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-        <div class="cloud w-32 h-10 top-10" style="animation-duration: 40s; left: 10%;">
-            <div class="w-12 h-12 -top-6 left-4"></div>
-            <div class="w-16 h-16 -top-8 left-10"></div>
-        </div>
-        <div class="cloud w-40 h-12 top-32" style="animation-duration: 60s; left: -10%;">
-            <div class="w-16 h-16 -top-8 left-6"></div>
-            <div class="w-20 h-20 -top-10 left-12"></div>
-        </div>
-        <div class="absolute bottom-0 w-full h-1/4 bg-game-darkgreen rounded-t-[50%_100%] scale-x-150 origin-bottom"></div>
-        <div class="absolute -bottom-10 w-full h-1/4 bg-game-green rounded-t-[50%_100%] scale-x-125 origin-bottom opacity-80"></div>
+    <!-- Latar Belakang Rimba & Kunang-kunang -->
+    <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none" id="firefly-container">
+        <div class="absolute bottom-0 w-full h-1/3 bg-leaf-dark rounded-t-[50%_100%] scale-x-150 origin-bottom opacity-80 shadow-[0_-20px_50px_rgba(0,0,0,0.5)]"></div>
+        <div class="absolute -bottom-10 w-full h-1/4 bg-green-900 rounded-t-[50%_100%] scale-x-125 origin-bottom opacity-90"></div>
     </div>
 
-    <!-- MAIN CONTAINER (Responsif untuk HP, Tablet, Laptop diperhalus) -->
-    <div class="relative z-10 w-full sm:w-[95%] md:w-11/12 lg:w-4/5 max-w-5xl h-full sm:h-[95%] md:h-[90%] max-h-[900px] bg-white/40 backdrop-blur-md sm:rounded-[40px] border-0 sm:border-8 border-white/60 shadow-2xl flex flex-col overflow-hidden">
+    <!-- MAIN CONTAINER (Papan Kayu) -->
+    <div class="relative z-10 w-full sm:w-[95%] md:w-11/12 lg:w-4/5 max-w-5xl h-full sm:h-[95%] md:h-[90%] max-h-[900px] board-panel sm:rounded-[40px] flex flex-col overflow-hidden">
         
-        <!-- HEADER KELOMPOK -->
-        <div class="absolute top-2 sm:top-4 left-0 w-full text-center z-50 pointer-events-none">
-            <span class="bg-game-yellow text-game-text text-[10px] sm:text-xs md:text-sm font-bold px-4 md:px-6 py-1.5 md:py-2 rounded-full shadow-md border-2 border-white/50 inline-block">
+        <!-- HEADER KELOMPOK (Plakat Kayu) -->
+        <div class="absolute top-0 left-1/2 -translate-x-1/2 z-50 pointer-events-none mt-0 sm:mt-2">
+            <div class="bg-wood-dark text-wood-board text-[10px] sm:text-xs md:text-sm font-bold px-6 py-2 rounded-b-2xl sm:rounded-full shadow-[0_4px_10px_rgba(0,0,0,0.4)] border-b-4 border-l-2 border-r-2 border-wood-DEFAULT inline-block whitespace-nowrap">
                 P8RA • Kelompok 2 • XI-1
-            </span>
+            </div>
         </div>
 
         <!-- SCREEN 1: HOME -->
         <div id="screen-home" class="screen active flex-col h-full items-center justify-center p-4 sm:p-6 relative hide-scroll">
-            <div class="animate-float text-center z-10 mt-6 sm:mt-0">
-                <div class="text-7xl sm:text-8xl md:text-[120px] mb-2 sm:mb-4">🌍</div>
-                <h1 class="text-4xl sm:text-5xl md:text-7xl font-black text-white drop-shadow-[0_4px_4px_rgba(0,0,0,0.3)] mb-2" style="text-stroke: 2px #00C853; -webkit-text-stroke: 2px #00C853;">
+            
+            <!-- Maskot: Tuku si Penyu Daun -->
+            <div class="animate-float z-10 w-48 h-48 sm:w-56 sm:h-56 md:w-72 md:h-72 mb-4 relative mt-10">
+                <!-- Speech Bubble -->
+                <div class="absolute -top-10 -right-16 bg-white border-4 border-leaf px-4 py-2 rounded-2xl rounded-bl-none shadow-lg transform rotate-6 animate-wiggle z-20">
+                    <p class="font-bold text-leaf-dark text-sm sm:text-base whitespace-nowrap">Halo! Aku Tuku 🐢🌿</p>
+                </div>
+                
+                <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" class="w-full h-full drop-shadow-2xl">
+                    <!-- Kaki Belakang -->
+                    <path d="M 60 145 Q 50 170 65 170 Q 75 170 75 145" fill="#4ade80" stroke="#14532d" stroke-width="4"/>
+                    <path d="M 125 145 Q 115 170 135 170 Q 145 170 145 145" fill="#4ade80" stroke="#14532d" stroke-width="4"/>
+                    <!-- Ekor -->
+                    <path d="M 35 125 Q 15 135 30 145" fill="#4ade80" stroke="#14532d" stroke-width="4"/>
+                    <!-- Kepala -->
+                    <circle cx="160" cy="115" r="28" fill="#4ade80" stroke="#14532d" stroke-width="4"/>
+                    <!-- Wajah Bahagia -->
+                    <path d="M 155 120 Q 165 130 175 120" fill="none" stroke="#14532d" stroke-width="3" stroke-linecap="round"/>
+                    <circle cx="153" cy="105" r="4" fill="#14532d"/>
+                    <circle cx="173" cy="105" r="4" fill="#14532d"/>
+                    <circle cx="151" cy="103" r="1.5" fill="white"/>
+                    <circle cx="171" cy="103" r="1.5" fill="white"/>
+                    <!-- Alis -->
+                    <path d="M 148 97 Q 153 92 158 97" fill="none" stroke="#14532d" stroke-width="2" stroke-linecap="round"/>
+                    <path d="M 168 97 Q 173 92 178 97" fill="none" stroke="#14532d" stroke-width="2" stroke-linecap="round"/>
+                    <!-- Tunas Daun di Kepala -->
+                    <path d="M 160 87 Q 150 67 135 70 Q 150 82 160 87" fill="#22c55e" stroke="#14532d" stroke-width="2"/>
+                    <path d="M 160 87 Q 170 67 185 70 Q 170 82 160 87" fill="#22c55e" stroke="#14532d" stroke-width="2"/>
+                    <!-- Tempurung (Daun Besar) -->
+                    <path d="M 35 120 C 15 50 100 20 145 90 C 155 110 145 145 90 150 C 45 150 35 120 35 120 Z" fill="#22c55e" stroke="#14532d" stroke-width="5"/>
+                    <!-- Tulang Daun -->
+                    <path d="M 45 110 Q 90 75 135 95" fill="none" stroke="#14532d" stroke-width="4" stroke-linecap="round"/>
+                    <path d="M 75 92 Q 65 65 75 55" fill="none" stroke="#14532d" stroke-width="4" stroke-linecap="round"/>
+                    <path d="M 98 85 Q 110 60 120 55" fill="none" stroke="#14532d" stroke-width="4" stroke-linecap="round"/>
+                    <path d="M 65 100 Q 55 115 50 125" fill="none" stroke="#14532d" stroke-width="4" stroke-linecap="round"/>
+                    <path d="M 112 90 Q 125 105 130 115" fill="none" stroke="#14532d" stroke-width="4" stroke-linecap="round"/>
+                </svg>
+            </div>
+
+            <div class="text-center z-10 mb-8 w-full px-2">
+                <h1 class="text-4xl sm:text-5xl md:text-7xl font-black text-leaf-light drop-shadow-[0_4px_2px_rgba(0,0,0,0.6)] mb-2" style="text-stroke: 2px #14532d; -webkit-text-stroke: 2px #14532d;">
                     EcoLearn!
                 </h1>
-                <p class="text-lg sm:text-xl md:text-2xl text-white font-bold drop-shadow-md mb-8 sm:mb-12">Petualangan Sang Penyelamat Bumi</p>
+                <p class="text-lg sm:text-xl md:text-2xl text-wood-dark font-bold drop-shadow-sm bg-white/50 inline-block px-4 py-1 rounded-full">Petualangan Rimba Lestari</p>
             </div>
 
             <div class="w-full max-w-md space-y-3 sm:space-y-4 z-10 pb-4">
-                <button onclick="playBtnClick(); changeScreen('screen-guide')" class="btn-3d w-full bg-game-orange text-white text-lg sm:text-xl md:text-2xl font-bold py-3 sm:py-4 rounded-2xl flex items-center justify-center gap-3">
-                    <span class="text-2xl sm:text-3xl">📖</span> Baca Panduan
+                <button onclick="playBtnClick(); changeScreen('screen-guide')" class="btn-wood w-full bg-earth text-white text-lg sm:text-xl md:text-2xl font-bold py-3 sm:py-4 rounded-2xl flex items-center justify-center gap-3">
+                    <span class="text-2xl sm:text-3xl">📜</span> Peta Panduan
                 </button>
-                <button onclick="playBtnClick(); startGame()" class="btn-3d w-full bg-game-darkgreen text-white text-lg sm:text-xl md:text-2xl font-bold py-3 sm:py-4 rounded-2xl flex items-center justify-center gap-3">
-                    <span class="text-2xl sm:text-3xl">🎮</span> Mulai Misi!
+                <button onclick="playBtnClick(); startGame()" class="btn-wood w-full bg-leaf text-white text-lg sm:text-xl md:text-2xl font-bold py-3 sm:py-4 rounded-2xl flex items-center justify-center gap-3">
+                    <span class="text-2xl sm:text-3xl">🍃</span> Mulai Misi!
                 </button>
             </div>
         </div>
 
         <!-- SCREEN 2: BUKU PANDUAN -->
-        <div id="screen-guide" class="screen flex-col h-full bg-white/90 p-4 sm:p-6 md:p-10 relative hide-scroll">
-            <div class="flex justify-between items-center mb-4 mt-10 sm:mt-8 md:mt-4 flex-shrink-0">
-                <button onclick="playBtnClick(); changeScreen('screen-home')" class="btn-3d w-10 h-10 md:w-12 md:h-12 bg-gray-200 text-gray-600 rounded-full flex items-center justify-center text-xl md:text-2xl font-bold">
+        <div id="screen-guide" class="screen flex-col h-full bg-wood-board p-4 sm:p-6 md:p-10 relative hide-scroll">
+            <div class="flex justify-between items-center mb-4 mt-10 sm:mt-8 md:mt-4 flex-shrink-0 border-b-4 border-wood-light pb-4">
+                <button onclick="playBtnClick(); changeScreen('screen-home')" class="btn-wood w-10 h-10 md:w-12 md:h-12 bg-wood-dark text-wood-board rounded-full flex items-center justify-center text-xl md:text-2xl font-bold">
                     ←
                 </button>
-                <h2 class="text-xl sm:text-2xl md:text-4xl font-bold text-game-darkgreen text-center w-full">Buku Panduan</h2>
+                <h2 class="text-xl sm:text-2xl md:text-4xl font-black text-wood-dark text-center w-full drop-shadow-sm">Panduan Penyelamat Hutan</h2>
                 <div class="w-10 md:w-12"></div>
             </div>
 
-            <!-- Kontainer Kartu Grid untuk Desktop/Tablet, Scroll untuk Mobile -->
+            <!-- Kontainer Kartu Grid -->
             <div class="flex-grow overflow-y-auto hide-scroll pb-4">
                 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 h-full items-stretch">
                     <!-- Kartu 1 -->
-                    <div class="bg-blue-50 border-4 border-game-blue rounded-[20px] md:rounded-3xl p-4 md:p-6 flex flex-col items-center text-center shadow-sm h-full">
+                    <div class="bg-[#f0fdf4] border-4 border-leaf rounded-[20px] md:rounded-3xl p-4 md:p-6 flex flex-col items-center text-center shadow-md h-full relative overflow-hidden">
+                        <div class="absolute -right-4 -bottom-4 opacity-10 text-9xl">🛍️</div>
                         <div class="text-5xl md:text-6xl mb-2 md:mb-4 animate-wiggle">🛍️</div>
-                        <h3 class="text-lg sm:text-xl md:text-2xl font-bold text-game-darkgreen mb-2 md:mb-3">Pahlawan Anti Plastik</h3>
-                        <p class="text-sm md:text-lg text-gray-700 font-medium">Bawa tumbler minum dan tas belanja sendiri! Memakai barang yang bisa dipakai ulang sangat ampuh mengurangi tumpukan sampah plastik.</p>
+                        <h3 class="text-lg sm:text-xl md:text-2xl font-bold text-leaf-dark mb-2 md:mb-3 z-10">Pahlawan Anti Plastik</h3>
+                        <p class="text-sm md:text-base text-wood-dark font-medium z-10">Bawa tumbler minum dan tas belanja sendiri! Memakai barang yang bisa dipakai ulang sangat ampuh mengurangi tumpukan sampah di bumi.</p>
                     </div>
                     <!-- Kartu 2 -->
-                    <div class="bg-orange-50 border-4 border-game-orange rounded-[20px] md:rounded-3xl p-4 md:p-6 flex flex-col items-center text-center shadow-sm h-full">
+                    <div class="bg-[#fffbeb] border-4 border-earth rounded-[20px] md:rounded-3xl p-4 md:p-6 flex flex-col items-center text-center shadow-md h-full relative overflow-hidden">
+                        <div class="absolute -right-4 -bottom-4 opacity-10 text-9xl">💡</div>
                         <div class="text-5xl md:text-6xl mb-2 md:mb-4 animate-wiggle" style="animation-delay: 0.2s">💡</div>
-                        <h3 class="text-lg sm:text-xl md:text-2xl font-bold text-game-orange mb-2 md:mb-3">Detektif Energi</h3>
-                        <p class="text-sm md:text-lg text-gray-700 font-medium">Hemat sumber daya! Matikan lampu dan alat elektronik jika tidak dipakai. Gunakan air secukupnya dan tutup rapat keran!</p>
+                        <h3 class="text-lg sm:text-xl md:text-2xl font-bold text-earth-dark mb-2 md:mb-3 z-10">Detektif Energi</h3>
+                        <p class="text-sm md:text-base text-wood-dark font-medium z-10">Hemat sumber daya alam! Matikan lampu dan alat elektronik jika tidak dipakai. Gunakan air secukupnya dan tutup rapat keran!</p>
                     </div>
                     <!-- Kartu 3 -->
-                    <div class="bg-green-50 border-4 border-game-green rounded-[20px] md:rounded-3xl p-4 md:p-6 flex flex-col items-center text-center shadow-sm h-full sm:col-span-2 md:col-span-1">
+                    <div class="bg-[#ecfdf5] border-4 border-emerald-500 rounded-[20px] md:rounded-3xl p-4 md:p-6 flex flex-col items-center text-center shadow-md h-full sm:col-span-2 md:col-span-1 relative overflow-hidden">
+                        <div class="absolute -right-4 -bottom-4 opacity-10 text-9xl">🧹</div>
                         <div class="text-5xl md:text-6xl mb-2 md:mb-4 animate-wiggle" style="animation-delay: 0.4s">🧹</div>
-                        <h3 class="text-lg sm:text-xl md:text-2xl font-bold text-game-darkgreen mb-2 md:mb-3">Juara Kebersihan</h3>
-                        <p class="text-sm md:text-lg text-gray-700 font-medium">Buang sampah pada tempatnya. Menjaga kebersihan sekolah dan lingkungan sekitar bikin kita nyaman, bersih, dan sehat selalu!</p>
+                        <h3 class="text-lg sm:text-xl md:text-2xl font-bold text-emerald-800 mb-2 md:mb-3 z-10">Penjaga Kebersihan</h3>
+                        <p class="text-sm md:text-base text-wood-dark font-medium z-10">Buang sampah pada tempatnya. Menjaga kebersihan sekolah dan lingkungan sekitar bikin satwa hutan senang, bersih, dan sehat!</p>
                     </div>
                 </div>
             </div>
 
-            <button onclick="playBtnClick(); startGame()" class="btn-3d mt-4 w-full md:w-1/2 md:mx-auto bg-game-darkgreen text-white text-lg sm:text-xl md:text-2xl font-bold py-3 md:py-4 rounded-2xl flex items-center justify-center gap-3 flex-shrink-0">
-                Siap Bermain! 🚀
+            <button onclick="playBtnClick(); startGame()" class="btn-wood mt-4 w-full md:w-1/2 md:mx-auto bg-leaf text-white text-lg sm:text-xl md:text-2xl font-black py-3 md:py-4 rounded-2xl flex items-center justify-center gap-3 flex-shrink-0 shadow-lg">
+                Siap Jelajah! 🚀
             </button>
         </div>
 
         <!-- SCREEN 3: KUIS GAME -->
-        <div id="screen-quiz" class="screen flex-col h-full bg-white p-3 sm:p-4 md:p-8 relative hide-scroll">
+        <div id="screen-quiz" class="screen flex-col h-full p-3 sm:p-4 md:p-6 relative hide-scroll">
             
-            <!-- Top HUD Bar -->
-            <div class="flex justify-between items-center mb-3 md:mb-4 mt-8 sm:mt-6 md:mt-0 bg-slate-100 p-2 sm:p-3 md:px-6 rounded-[14px] md:rounded-2xl border-2 border-slate-200 flex-shrink-0">
-                <!-- Nyawa -->
-                <div class="flex gap-0.5 sm:gap-1 text-lg sm:text-xl md:text-3xl" id="lives-container">❤️ ❤️ ❤️</div>
+            <!-- Top HUD Bar (Kayu) -->
+            <div class="flex justify-between items-center bg-wood-dark p-2 sm:p-3 md:px-6 rounded-[14px] md:rounded-2xl border-4 border-wood-light shadow-md shrink-0 w-full max-w-4xl mx-auto z-20 mt-8 sm:mt-6 md:mt-0">
+                <!-- Nyawa (Daun) -->
+                <div class="flex gap-0.5 sm:gap-1 text-lg sm:text-xl md:text-3xl" id="lives-container">💚 💚 💚</div>
                 
                 <!-- Streak & Score -->
                 <div class="flex items-center gap-2 sm:gap-4">
-                    <div id="streak-container" class="hidden items-center gap-1 text-game-orange font-bold text-sm sm:text-lg md:text-xl animate-bounce">
+                    <div id="streak-container" class="hidden items-center gap-1 text-orange-400 font-bold text-sm sm:text-lg md:text-xl animate-bounce drop-shadow-md">
                         🔥 x<span id="streak-count">2</span>
                     </div>
-                    <div class="bg-game-yellow px-2 sm:px-4 py-1 sm:py-1.5 rounded-lg sm:rounded-xl font-bold text-sm sm:text-lg md:text-2xl border-2 border-orange-300 shadow-sm flex items-center gap-1 sm:gap-2">
+                    <div class="bg-wood-board px-2 sm:px-4 py-1 sm:py-1.5 rounded-lg sm:rounded-xl font-bold text-sm sm:text-lg md:text-2xl border-2 border-wood-light shadow-inner flex items-center gap-1 sm:gap-2 text-wood-dark">
                         <span>⭐️</span> <span id="score-display">0</span>
                     </div>
                 </div>
             </div>
 
-            <!-- Timer Bar -->
-            <div class="w-full bg-gray-200 h-3 sm:h-4 md:h-6 rounded-full mb-4 md:mb-6 border-2 border-gray-300 overflow-hidden relative flex-shrink-0">
-                <div id="timer-bar" class="bg-game-green h-full transition-all duration-100 rounded-full w-full"></div>
-                <div id="timer-text" class="absolute inset-0 flex items-center justify-center text-[10px] sm:text-xs md:text-sm font-bold text-gray-700 z-10">15s</div>
-            </div>
-
-            <!-- Main Quiz Area -->
-            <div class="flex-grow flex flex-col md:flex-row gap-4 md:gap-6 min-h-0">
+            <!-- Kontainer Utama Kuis (Tengah layar) -->
+            <div class="flex-grow flex flex-col items-center justify-start sm:justify-center w-full max-w-4xl mx-auto mt-4 sm:mt-0 gap-4 sm:gap-5 pb-4 overflow-y-auto hide-scroll z-10">
                 
-                <!-- Kiri: Pertanyaan & Bantuan -->
-                <div class="md:w-1/2 flex flex-col min-h-[160px] md:min-h-0 flex-shrink-0 md:flex-shrink">
-                    <div class="bg-blue-50 border-4 border-blue-200 rounded-[20px] md:rounded-3xl p-4 sm:p-6 text-center flex-grow flex flex-col justify-center relative">
-                        <div class="absolute -top-5 sm:-top-6 left-1/2 -translate-x-1/2 bg-white text-2xl sm:text-3xl md:text-4xl p-1.5 sm:p-2 rounded-full border-4 border-blue-200 shadow-md">🤔</div>
-                        <h3 id="question-text" class="text-lg sm:text-xl md:text-3xl font-bold text-game-text mt-2 sm:mt-4 leading-snug sm:leading-relaxed">
-                            Pertanyaan?
-                        </h3>
-                    </div>
+                <!-- Kotak Pertanyaan & Timer -->
+                <div class="w-full bg-wood-paper border-4 border-wood-light rounded-[20px] md:rounded-3xl p-4 sm:p-6 md:px-10 text-center relative shadow-lg shrink-0 mt-4 sm:mt-8">
+                    <!-- Ornamen -->
+                    <div class="absolute -top-6 sm:-top-8 left-1/2 -translate-x-1/2 bg-wood-board text-3xl sm:text-4xl p-1.5 sm:p-2 rounded-full border-4 border-wood-dark shadow-md animate-wiggle z-10">🤔</div>
+                    <div class="absolute -top-3 -left-3 text-3xl sm:text-4xl opacity-40 transform -rotate-45">🌿</div>
+                    <div class="absolute -bottom-3 -right-3 text-3xl sm:text-4xl opacity-40 transform rotate-135">🌿</div>
                     
-                    <!-- Tombol Bantuan (Clue) -->
-                    <button id="btn-hint" onclick="useHint()" class="btn-3d mt-3 sm:mt-4 w-full bg-purple-500 text-white font-bold py-2.5 sm:py-3 rounded-[14px] md:rounded-2xl flex justify-center items-center gap-2 border-b-4 border-purple-700 text-sm sm:text-base">
-                        <span class="text-xl sm:text-2xl">🔍</span> Bantuan 50:50 (<span id="hint-count">3</span>)
-                    </button>
+                    <h3 id="question-text" class="text-lg sm:text-xl md:text-2xl font-bold text-wood-dark mt-3 sm:mt-5 mb-4 sm:mb-6 leading-snug sm:leading-relaxed">
+                        Pertanyaan?
+                    </h3>
+
+                    <!-- Timer Bar Terintegrasi -->
+                    <div class="w-full bg-[#d4d4d8] h-3 sm:h-4 rounded-full border-2 border-wood-dark overflow-hidden relative shadow-inner">
+                        <div id="timer-bar" class="bg-leaf h-full transition-all duration-100 rounded-full w-full"></div>
+                        <div id="timer-text" class="absolute inset-0 flex items-center justify-center text-[10px] sm:text-xs font-black text-white drop-shadow-md z-10">15s</div>
+                    </div>
                 </div>
 
-                <!-- Kanan: Opsi Jawaban (Grid) -->
-                <div id="options-container" class="md:w-1/2 grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3 md:gap-4 mt-auto mb-2 md:m-0 overflow-y-auto hide-scroll pb-2">
+                <!-- Opsi Jawaban (Grid Rapat) -->
+                <div id="options-container" class="w-full grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 shrink-0">
                     <!-- Tombol dirender JS -->
                 </div>
+
+                <!-- Tombol Bantuan di bawah opsi -->
+                <button id="btn-hint" onclick="useHint()" class="btn-wood w-full sm:w-2/3 md:w-1/2 bg-earth text-white font-bold py-2.5 sm:py-3 rounded-[14px] md:rounded-2xl flex justify-center items-center gap-2 text-sm sm:text-base mx-auto shrink-0 mt-2">
+                    <span class="text-xl">🔍</span> Petunjuk Rimba (<span id="hint-count">3</span>)
+                </button>
             </div>
 
             <!-- Overlay Feedback -->
-            <div id="feedback-overlay" class="absolute inset-0 bg-black/60 z-50 hidden flex-col items-center justify-center p-4 sm:p-6 backdrop-blur-sm">
-                <div id="feedback-modal" class="bg-white p-6 sm:p-8 md:p-10 rounded-[20px] md:rounded-[30px] border-8 text-center max-w-md w-full transform scale-0 transition-transform duration-300 max-h-[90dvh] overflow-y-auto hide-scroll">
-                    <div id="feedback-icon" class="text-6xl sm:text-8xl md:text-9xl mb-2 sm:mb-4 animate-bounce-in">🎉</div>
-                    <h2 id="feedback-title" class="text-2xl sm:text-3xl md:text-4xl font-black mb-1 sm:mb-2">Benar!</h2>
-                    <p id="feedback-desc" class="text-sm sm:text-lg md:text-xl font-medium text-gray-600 mb-4 sm:mb-6">Penjelasan.</p>
+            <div id="feedback-overlay" class="absolute inset-0 bg-black/70 z-50 hidden flex-col items-center justify-center p-4 sm:p-6 backdrop-blur-sm">
+                <div id="feedback-modal" class="bg-wood-paper p-6 sm:p-8 md:p-10 rounded-[20px] md:rounded-[30px] border-8 text-center max-w-md w-full transform scale-0 transition-transform duration-300 max-h-[90dvh] overflow-y-auto hide-scroll shadow-2xl">
                     
-                    <!-- Bonus Info -->
-                    <div id="bonus-info" class="hidden bg-yellow-100 text-yellow-800 font-bold py-2 px-4 rounded-xl mb-4 sm:mb-6 text-xs sm:text-sm md:text-base border-2 border-yellow-300">
-                        🔥 Combo Streak! +<span id="bonus-points">50</span> Poin
+                    <!-- Dinamik SVG Maskot Feedback -->
+                    <div class="w-32 h-32 md:w-40 md:h-40 mx-auto mb-2 sm:mb-4 animate-bounce-in">
+                        <svg id="mascot-feedback" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" class="w-full h-full drop-shadow-lg">
+                            <path d="M 60 145 Q 50 170 65 170 Q 75 170 75 145" fill="#4ade80" stroke="#14532d" stroke-width="4"/>
+                            <path d="M 125 145 Q 115 170 135 170 Q 145 170 145 145" fill="#4ade80" stroke="#14532d" stroke-width="4"/>
+                            <path d="M 35 125 Q 15 135 30 145" fill="#4ade80" stroke="#14532d" stroke-width="4"/>
+                            <circle cx="160" cy="115" r="28" fill="#4ade80" stroke="#14532d" stroke-width="4"/>
+                            
+                            <!-- Wajah Bahagia (Benar) -->
+                            <g id="face-happy">
+                                <path d="M 155 120 Q 165 130 175 120" fill="none" stroke="#14532d" stroke-width="3" stroke-linecap="round"/>
+                                <circle cx="153" cy="105" r="4" fill="#14532d"/>
+                                <circle cx="173" cy="105" r="4" fill="#14532d"/>
+                                <circle cx="151" cy="103" r="1.5" fill="white"/>
+                                <circle cx="171" cy="103" r="1.5" fill="white"/>
+                            </g>
+                            
+                            <!-- Wajah Sedih/Kaget (Salah) -->
+                            <g id="face-sad" class="hidden">
+                                <path d="M 155 125 Q 165 115 175 125" fill="none" stroke="#14532d" stroke-width="3" stroke-linecap="round"/>
+                                <path d="M 148 105 L 158 105 M 168 105 L 178 105" fill="none" stroke="#14532d" stroke-width="3" stroke-linecap="round"/>
+                                <path d="M 148 95 L 158 90" fill="none" stroke="#14532d" stroke-width="2" stroke-linecap="round"/>
+                                <path d="M 168 90 L 178 95" fill="none" stroke="#14532d" stroke-width="2" stroke-linecap="round"/>
+                            </g>
+
+                            <path d="M 160 87 Q 150 67 135 70 Q 150 82 160 87" fill="#22c55e" stroke="#14532d" stroke-width="2"/>
+                            <path d="M 160 87 Q 170 67 185 70 Q 170 82 160 87" fill="#22c55e" stroke="#14532d" stroke-width="2"/>
+                            <path d="M 35 120 C 15 50 100 20 145 90 C 155 110 145 145 90 150 C 45 150 35 120 35 120 Z" fill="#22c55e" stroke="#14532d" stroke-width="5"/>
+                            <path d="M 45 110 Q 90 75 135 95" fill="none" stroke="#14532d" stroke-width="4" stroke-linecap="round"/>
+                            <path d="M 75 92 Q 65 65 75 55" fill="none" stroke="#14532d" stroke-width="4" stroke-linecap="round"/>
+                            <path d="M 98 85 Q 110 60 120 55" fill="none" stroke="#14532d" stroke-width="4" stroke-linecap="round"/>
+                            <path d="M 65 100 Q 55 115 50 125" fill="none" stroke="#14532d" stroke-width="4" stroke-linecap="round"/>
+                            <path d="M 112 90 Q 125 105 130 115" fill="none" stroke="#14532d" stroke-width="4" stroke-linecap="round"/>
+                        </svg>
                     </div>
 
-                    <button onclick="playBtnClick(); nextQuestion()" class="btn-3d w-full bg-game-blue text-white text-lg sm:text-xl md:text-2xl font-bold py-3 md:py-4 rounded-xl md:rounded-2xl">
+                    <h2 id="feedback-title" class="text-2xl sm:text-3xl md:text-4xl font-black mb-1 sm:mb-2">Hebat!</h2>
+                    <p id="feedback-desc" class="text-sm sm:text-lg md:text-xl font-medium text-wood-dark mb-4 sm:mb-6">Penjelasan.</p>
+                    
+                    <!-- Bonus Info -->
+                    <div id="bonus-info" class="hidden bg-orange-100 text-orange-800 font-bold py-2 px-4 rounded-xl mb-4 sm:mb-6 text-xs sm:text-sm md:text-base border-2 border-orange-300">
+                        🔥 Combo Beruntun! +<span id="bonus-points">50</span> Poin
+                    </div>
+
+                    <button onclick="playBtnClick(); nextQuestion()" class="btn-wood w-full bg-leaf text-white text-lg sm:text-xl md:text-2xl font-bold py-3 md:py-4 rounded-xl md:rounded-2xl">
                         Lanjut ➔
                     </button>
                 </div>
@@ -279,26 +367,30 @@
         </div>
 
         <!-- SCREEN 4: HASIL AKHIR -->
-        <div id="screen-result" class="screen flex-col h-full items-center justify-center p-4 sm:p-6 bg-gradient-to-b from-game-yellow to-game-orange relative hide-scroll">
-            <div class="bg-white p-6 sm:p-8 md:p-12 rounded-[20px] sm:rounded-[40px] border-8 border-white/50 shadow-2xl text-center w-full max-w-md animate-bounce-in mt-6 sm:mt-0">
-                <div id="result-emoji" class="text-7xl sm:text-8xl md:text-9xl mb-2 sm:mb-4 animate-wiggle">🏆</div>
-                <h2 id="result-title" class="text-3xl sm:text-4xl md:text-5xl font-black text-game-text mb-1 sm:mb-2">Misi Selesai!</h2>
-                <p id="result-msg" class="text-sm sm:text-lg md:text-xl font-bold text-gray-600 mb-6 sm:mb-8">Kamu Pahlawan Bumi!</p>
+        <div id="screen-result" class="screen flex-col h-full items-center justify-center p-4 sm:p-6 bg-wood-board relative hide-scroll">
+            <div class="bg-wood-paper p-6 sm:p-8 md:p-12 rounded-[20px] sm:rounded-[40px] border-8 border-wood-light shadow-2xl text-center w-full max-w-md animate-bounce-in mt-6 sm:mt-0 relative overflow-hidden">
+                <!-- Ornamen Daun di Pojok -->
+                <div class="absolute -top-6 -left-6 text-6xl opacity-30 transform -rotate-45">🌿</div>
+                <div class="absolute -bottom-6 -right-6 text-6xl opacity-30 transform rotate-45">🌿</div>
+
+                <div id="result-emoji" class="text-7xl sm:text-8xl md:text-9xl mb-2 sm:mb-4 animate-wiggle drop-shadow-md">🏆</div>
+                <h2 id="result-title" class="text-3xl sm:text-4xl md:text-5xl font-black text-wood-dark mb-1 sm:mb-2">Misi Selesai!</h2>
+                <p id="result-msg" class="text-sm sm:text-lg md:text-xl font-bold text-earth-dark mb-6 sm:mb-8">Kamu Pahlawan Rimba!</p>
                 
-                <div class="bg-slate-100 rounded-[20px] sm:rounded-3xl p-4 sm:p-6 md:p-8 mb-6 sm:mb-8">
-                    <p class="text-xs sm:text-base font-bold text-gray-500 mb-1">TOTAL SKOR</p>
-                    <div class="text-6xl sm:text-7xl md:text-8xl font-black text-game-orange" id="final-score">0</div>
-                    <div id="stars-container" class="text-3xl sm:text-4xl md:text-5xl mt-3 sm:mt-4 flex justify-center gap-2">
+                <div class="bg-wood-board border-4 border-wood-light rounded-[20px] sm:rounded-3xl p-4 sm:p-6 md:p-8 mb-6 sm:mb-8 shadow-inner">
+                    <p class="text-xs sm:text-base font-bold text-wood-light mb-1 tracking-widest uppercase">Total Skor</p>
+                    <div class="text-6xl sm:text-7xl md:text-8xl font-black text-leaf-dark drop-shadow-sm" id="final-score">0</div>
+                    <div id="stars-container" class="text-3xl sm:text-4xl md:text-5xl mt-3 sm:mt-4 flex justify-center gap-2 drop-shadow-md">
                         <!-- Bintang -->
                     </div>
                 </div>
 
-                <div class="flex flex-col sm:flex-row gap-3 sm:gap-4">
-                    <button onclick="playBtnClick(); resetGame()" class="btn-3d flex-1 bg-game-darkgreen text-white text-base sm:text-xl font-bold py-3 sm:py-4 rounded-xl sm:rounded-2xl">
+                <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 relative z-10">
+                    <button onclick="playBtnClick(); resetGame()" class="btn-wood flex-1 bg-leaf text-white text-base sm:text-xl font-bold py-3 sm:py-4 rounded-xl sm:rounded-2xl">
                         Main Lagi 🔄
                     </button>
-                    <button onclick="playBtnClick(); changeScreen('screen-home')" class="btn-3d flex-1 bg-gray-200 text-gray-700 text-sm sm:text-lg font-bold py-3 sm:py-4 rounded-xl sm:rounded-2xl">
-                        Menu Utama
+                    <button onclick="playBtnClick(); changeScreen('screen-home')" class="btn-wood flex-1 bg-wood-dark text-white text-sm sm:text-lg font-bold py-3 sm:py-4 rounded-xl sm:rounded-2xl">
+                        Kemah Utama
                     </button>
                 </div>
             </div>
@@ -308,16 +400,29 @@
 
     <!-- JavaScript Logic -->
     <script>
+        // --- INJEKSI KUNANG-KUNANG ---
+        (function generateFireflies() {
+            const container = document.getElementById('firefly-container');
+            for(let i=0; i<30; i++) {
+                let firefly = document.createElement('div');
+                firefly.className = 'firefly';
+                firefly.style.left = Math.random() * 100 + 'vw';
+                firefly.style.setProperty('--fdur', (Math.random() * 5 + 5) + 's'); // 5-10s duration
+                firefly.style.setProperty('--fdel', (Math.random() * 10) + 's'); // 0-10s delay
+                container.appendChild(firefly);
+            }
+        })();
+
         // --- DATA PERMAINAN ---
         const quizData = [
-            { q: "Apa yang termasuk kebiasaan ramah lingkungan?", options: ["Membuang sampah sembarangan", "Mengurangi sampah & menghemat sumber daya", "Boros menggunakan listrik", "Membeli banyak barang plastik"], correct: 1, exp: "Pahlawan bumi selalu berusaha mengurangi sampah dan tidak boros sumber daya!" },
-            { q: "Bagaimana cara mengurangi sampah plastik?", options: ["Membawa tumbler & tas belanja", "Membeli air mineral botol", "Membakar sampah plastik", "Memakai sedotan plastik"], correct: 0, exp: "Membawa tumbler & tas belanja sendiri bikin kita gak perlu pakai plastik sekali pakai lagi!" },
-            { q: "Bagaimana cara kita menghemat listrik?", options: ["Menyalakan AC saat pergi", "Membiarkan TV menyala", "Mematikan lampu & elektronik", "Membuka kulkas berlama-lama"], correct: 2, exp: "Jangan biarkan energi terbuang sia-sia! Matikan alat elektronik jika sudah selesai." },
-            { q: "Bagaimana cara menghemat penggunaan air?", options: ["Mandi berjam-jam", "Gunakan secukupnya & tutup keran", "Biarkan keran mengalir", "Mencuci baju tiap jam"], correct: 1, exp: "Air bersih sangat berharga. Gunakan secukupnya dan tutup keran dengan rapat!" },
-            { q: "Mengapa harus membuang sampah pada tempatnya?", options: ["Supaya terlihat keren", "Agar mendapat pujian", "Supaya tempat sampah penuh", "Agar lingkungan bersih & sehat"], correct: 3, exp: "Lingkungan bebas sampah membuat kita sehat, nyaman, dan terhindar dari penyakit." },
-            { q: "Apa contoh ramah lingkungan di sekolah?", options: ["Mencoret meja", "Jajan sembarangan", "Bawa tumbler & jaga kebersihan", "Merusak tanaman"], correct: 2, exp: "Menjaga kebersihan kelas dan membawa bekal minum sendiri adalah ciri murid teladan!" },
-            { q: "Apa manfaat barang yang dapat dipakai ulang?", options: ["Membuang waktu", "Mengurangi jumlah sampah", "Membuat tas berat", "Menambah sampah di rumah"], correct: 1, exp: "Barang pakai ulang (reusable) mencegah penumpukan sampah baru di bumi." },
-            { q: "Bagaimana cara menjaga lingkungan sekitar?", options: ["Tidak membuang sampah sembarangan", "Menunggu orang lain", "Menyembunyikan sampah", "Membuang ke sungai"], correct: 0, exp: "Kebersihan adalah tanggung jawab bersama. Mulai kebiasaan baik dari diri sendiri!" }
+            { q: "Apa yang termasuk kebiasaan ramah lingkungan saat pergi ke hutan/taman?", options: ["Meninggalkan bungkus makanan", "Membawa kembali sampah kita", "Memetik bunga sembarangan", "Memberi makan hewan liar snack"], correct: 1, exp: "Pahlawan bumi selalu membawa pulang sampahnya dan tidak merusak alam!" },
+            { q: "Bagaimana cara efektif mengurangi sampah plastik di sekolah?", options: ["Membawa tumbler & kotak bekal", "Membeli air botol setiap hari", "Membakar sampah plastik", "Memakai sedotan plastik baru"], correct: 0, exp: "Tuku bilang: Membawa tumbler & kotak bekal sendiri bikin kita gak perlu pakai plastik sekali pakai lagi!" },
+            { q: "Bagaimana cara kita menghemat listrik di rumah/sekolah?", options: ["Menyalakan AC walau ruangan kosong", "Membiarkan TV menyala seharian", "Mematikan lampu & alat jika selesai", "Membuka kulkas berlama-lama"], correct: 2, exp: "Jangan biarkan energi terbuang sia-sia! Matikan alat elektronik jika sudah selesai digunakan." },
+            { q: "Bagaimana cara menghemat penggunaan air bersih?", options: ["Mandi air mengalir berjam-jam", "Gunakan secukupnya & tutup keran", "Biarkan keran bocor menetes", "Mencuci baju setiap jam"], correct: 1, exp: "Air bersih sangat berharga bagi semua makhluk hidup. Gunakan secukupnya dan tutup keran dengan rapat!" },
+            { q: "Mengapa harus membuang sampah pada tempat yang tepat?", options: ["Supaya terlihat keren saja", "Agar mendapat pujian guru", "Supaya tong sampah cepat rusak", "Agar lingkungan tidak tercemar & sehat"], correct: 3, exp: "Lingkungan bebas sampah membuat satwa liar aman, dan kita terhindar dari penyakit." },
+            { q: "Apa contoh perilaku teladan menjaga lingkungan?", options: ["Mencoret-coret pohon", "Jajan makanan banyak plastik", "Menanam bibit pohon & merawatnya", "Merusak tanaman teman"], correct: 2, exp: "Menanam pohon membantu memberikan oksigen segar untuk kita semua!" },
+            { q: "Apa manfaat dari barang yang dapat dipakai ulang (reusable)?", options: ["Membuang-buang waktu", "Mengurangi jumlah tumpukan sampah", "Membuat tas sekolah berat", "Menambah sampah di rumah"], correct: 1, exp: "Barang pakai ulang (reusable) mencegah penumpukan sampah baru di bumi yang kita cintai." },
+            { q: "Bagaimana cara paling mudah menjaga lingkungan sekitar kita?", options: ["Mulai dari tidak membuang sampah sembarangan", "Menunggu orang lain membersihkan", "Menyembunyikan sampah di laci", "Membuang sampah ke selokan air"], correct: 0, exp: "Kebersihan adalah tanggung jawab bersama. Mulai kebiasaan baik dari diri kita sendiri!" }
         ];
 
         // --- STATE VARIABLE ---
@@ -328,20 +433,16 @@
         let streak = 0;
         const basePoints = 100;
         
-        // Timer
         let timeLeft = 15;
         let timerInterval;
-
-        // Audio Synth
         let synth;
         let audioInitialized = false;
 
         // --- AUDIO SYSTEM (Tone.js) ---
         function initAudio() {
             if (!audioInitialized) {
-                // Gunakan PolySynth sederhana agar tidak butuh file mp3 eksternal
                 synth = new Tone.PolySynth(Tone.Synth).toDestination();
-                synth.volume.value = -5; // Turunkan volume sedikit
+                synth.volume.value = -6; 
                 Tone.start();
                 audioInitialized = true;
             }
@@ -408,15 +509,12 @@
         }
 
         function updateHUD() {
-            // Nyawa
             let hearts = "";
-            for(let i=0; i<3; i++) hearts += i < lives ? "❤️ " : "🖤 ";
+            for(let i=0; i<3; i++) hearts += i < lives ? "💚 " : "🖤 ";
             document.getElementById('lives-container').innerHTML = hearts.trim();
             
-            // Skor
             document.getElementById('score-display').innerText = score;
 
-            // Streak
             const streakEl = document.getElementById('streak-container');
             if(streak >= 2) {
                 streakEl.classList.remove('hidden');
@@ -435,9 +533,9 @@
             const timerText = document.getElementById('timer-text');
             
             timerBar.style.width = '100%';
-            timerBar.className = 'bg-game-green h-full transition-all duration-1000 linear rounded-full w-full';
+            timerBar.className = 'bg-leaf h-full transition-all duration-1000 linear rounded-full w-full';
             timerText.innerText = '15s';
-            timerText.classList.remove('timer-warning', 'text-red-600');
+            timerText.classList.remove('timer-warning', 'text-game-red');
 
             timerInterval = setInterval(() => {
                 timeLeft--;
@@ -446,17 +544,17 @@
                 timerText.innerText = timeLeft + 's';
 
                 if(timeLeft <= 5) {
-                    timerBar.classList.replace('bg-game-green', 'bg-game-red');
-                    timerBar.classList.replace('bg-game-yellow', 'bg-game-red'); // in case it was yellow
-                    timerText.classList.add('timer-warning', 'text-red-600');
-                    if(synth && timeLeft > 0) synth.triggerAttackRelease("C6", "64n"); // Suara detak
+                    timerBar.classList.replace('bg-leaf', 'bg-game-red');
+                    timerBar.classList.replace('bg-earth', 'bg-game-red'); 
+                    timerText.classList.add('timer-warning', 'text-game-red');
+                    if(synth && timeLeft > 0) synth.triggerAttackRelease("C6", "64n"); 
                 } else if(timeLeft <= 10) {
-                    timerBar.classList.replace('bg-game-green', 'bg-game-yellow');
+                    timerBar.classList.replace('bg-leaf', 'bg-earth');
                 }
 
                 if (timeLeft <= 0) {
                     clearInterval(timerInterval);
-                    checkAnswer(-1); // -1 menandakan timeout
+                    checkAnswer(-1); // timeout
                 }
             }, 1000);
         }
@@ -473,15 +571,15 @@
             const optContainer = document.getElementById('options-container');
             optContainer.innerHTML = ''; 
 
-            const colors = ['bg-game-blue', 'bg-game-green', 'bg-game-yellow', 'bg-game-orange'];
-            const textColors = ['text-white', 'text-game-text', 'text-game-text', 'text-white'];
-
+            // Warna opsi bernuansa Hutan/Alam
+            const colors = ['bg-[#065f46]', 'bg-[#166534]', 'bg-[#854d0e]', 'bg-[#b45309]']; 
+            
             qData.options.forEach((opt, index) => {
                 const btn = document.createElement('button');
                 btn.id = 'opt-' + index;
-                // Responsive text size for options
-                btn.className = `option-btn btn-3d w-full h-full min-h-[64px] sm:min-h-[80px] ${colors[index]} ${textColors[index]} text-sm sm:text-lg md:text-xl font-bold py-2 sm:py-3 px-3 sm:px-4 rounded-[14px] sm:rounded-2xl text-left flex items-center gap-2 sm:gap-3`;
-                btn.innerHTML = `<span class="bg-white/40 text-current rounded-lg min-w-[28px] sm:min-w-[32px] h-7 sm:h-8 flex items-center justify-center shadow-inner text-sm sm:text-base">${String.fromCharCode(65+index)}</span> <span class="leading-tight">${opt}</span>`;
+                // UI lebih padat & text disesuaikan
+                btn.className = `option-btn btn-wood w-full min-h-[56px] sm:min-h-[64px] ${colors[index]} text-white text-sm sm:text-base md:text-lg font-bold py-2.5 sm:py-3 px-3 sm:px-4 rounded-[14px] sm:rounded-xl text-left flex items-center gap-2.5 sm:gap-3 hover:brightness-110`;
+                btn.innerHTML = `<span class="bg-black/30 text-current rounded-lg min-w-[28px] sm:min-w-[32px] h-7 sm:h-8 flex items-center justify-center shadow-inner text-sm sm:text-base border border-white/20 shrink-0">${String.fromCharCode(65+index)}</span> <span class="leading-tight">${opt}</span>`;
                 btn.onclick = () => { playBtnClick(); checkAnswer(index); };
                 optContainer.appendChild(btn);
             });
@@ -502,8 +600,7 @@
             const correctIdx = qData.correct;
             let removedCount = 0;
 
-            // Cari 2 opsi salah untuk dihilangkan
-            const options = [0, 1, 2, 3].sort(() => Math.random() - 0.5); // Acak
+            const options = [0, 1, 2, 3].sort(() => Math.random() - 0.5);
             for(let i of options) {
                 if(i !== correctIdx && removedCount < 2) {
                     const btn = document.getElementById('opt-' + i);
@@ -515,31 +612,32 @@
         }
 
         function checkAnswer(selectedIndex) {
-            clearInterval(timerInterval); // Stop timer
+            clearInterval(timerInterval);
             const qData = quizData[currentQuestionIdx];
             const isTimeout = selectedIndex === -1;
             const isCorrect = !isTimeout && selectedIndex === qData.correct;
             
-            // Disable all buttons
             document.querySelectorAll('.option-btn, #btn-hint').forEach(b => b.disabled = true);
 
             const overlay = document.getElementById('feedback-overlay');
             const modal = document.getElementById('feedback-modal');
-            const icon = document.getElementById('feedback-icon');
             const title = document.getElementById('feedback-title');
             const desc = document.getElementById('feedback-desc');
             const bonusInfo = document.getElementById('bonus-info');
+            
+            const faceHappy = document.getElementById('face-happy');
+            const faceSad = document.getElementById('face-sad');
 
             overlay.classList.remove('hidden');
             overlay.classList.add('flex');
-            void modal.offsetWidth; // Trigger reflow
+            void modal.offsetWidth; 
             modal.style.transform = 'scale(1)';
-            bonusInfo.classList.add('hidden'); // Reset bonus display
+            bonusInfo.classList.add('hidden');
 
             if (isCorrect) {
                 streak++;
                 let bonus = 0;
-                if(streak >= 2) bonus = 50; // Bonus combo
+                if(streak >= 2) bonus = 50; 
                 if(streak >= 4) bonus = 100;
 
                 score += basePoints + bonus;
@@ -550,18 +648,20 @@
                 }
 
                 playCorrectSound();
-                icon.innerText = "🎉";
-                title.innerText = "Hebat!";
-                title.className = "text-2xl sm:text-3xl md:text-4xl font-black mb-1 sm:mb-2 text-game-darkgreen";
-                modal.className = "bg-white p-6 sm:p-8 md:p-10 rounded-[20px] md:rounded-[30px] border-8 border-game-green text-center max-w-md w-full transform transition-transform duration-300 scale-100 max-h-[90dvh] overflow-y-auto hide-scroll";
+                faceHappy.classList.remove('hidden');
+                faceSad.classList.add('hidden');
+                title.innerText = "Benar Sekali!";
+                title.className = "text-2xl sm:text-3xl md:text-4xl font-black mb-1 sm:mb-2 text-leaf-dark";
+                modal.className = "bg-wood-paper p-6 sm:p-8 md:p-10 rounded-[20px] md:rounded-[30px] border-8 border-leaf text-center max-w-md w-full transform transition-transform duration-300 scale-100 max-h-[90dvh] overflow-y-auto hide-scroll shadow-2xl";
             } else {
-                streak = 0; // Reset streak
+                streak = 0; 
                 lives--;
                 playWrongSound();
-                icon.innerText = isTimeout ? "⏰" : "💥";
-                title.innerText = isTimeout ? "Waktu Habis!" : "Kurang Tepat!";
+                faceHappy.classList.add('hidden');
+                faceSad.classList.remove('hidden');
+                title.innerText = isTimeout ? "Waktu Habis!" : "Yah, Kurang Tepat!";
                 title.className = "text-2xl sm:text-3xl md:text-4xl font-black mb-1 sm:mb-2 text-game-red";
-                modal.className = "bg-white p-6 sm:p-8 md:p-10 rounded-[20px] md:rounded-[30px] border-8 border-game-red text-center max-w-md w-full transform transition-transform duration-300 scale-100 max-h-[90dvh] overflow-y-auto hide-scroll";
+                modal.className = "bg-wood-paper p-6 sm:p-8 md:p-10 rounded-[20px] md:rounded-[30px] border-8 border-wood-dark text-center max-w-md w-full transform transition-transform duration-300 scale-100 max-h-[90dvh] overflow-y-auto hide-scroll shadow-2xl";
             }
 
             desc.innerText = qData.exp;
@@ -595,7 +695,6 @@
             const finalScore = document.getElementById('final-score');
             const starsContainer = document.getElementById('stars-container');
 
-            // Hitung animasi score naik (counter)
             let currentDisplayScore = 0;
             const scoreInterval = setInterval(() => {
                 currentDisplayScore += 25;
@@ -610,34 +709,33 @@
             if (lives <= 0) {
                 playLoseSound();
                 title.innerText = "Game Over!";
-                msg.innerText = "Jangan menyerah, ayo baca panduan & coba lagi!";
-                emoji.innerText = "😢";
+                msg.innerText = "Hutan butuh bantuanmu, ayo coba lagi!";
+                emoji.innerText = "🥀";
                 stars = 0;
             } else if (score >= 800) {
                 playWinSound();
                 title.innerText = "Sempurna!";
-                msg.innerText = "Kamu adalah Penyelamat Bumi Sejati!";
+                msg.innerText = "Tuku sangat bangga! Kamu Penyelamat Rimba Sejati!";
                 emoji.innerText = "👑";
                 stars = 3;
             } else if (score >= 500) {
                 playWinSound();
                 title.innerText = "Kerja Bagus!";
-                msg.innerText = "Pemahamanmu sudah sangat keren!";
+                msg.innerText = "Pemahamanmu tentang alam sudah luar biasa!";
                 emoji.innerText = "🌟";
                 stars = 2;
             } else {
                 playWinSound();
                 title.innerText = "Misi Selesai!";
                 msg.innerText = "Tetap semangat menjaga bumi ya!";
-                emoji.innerText = "👍";
+                emoji.innerText = "🌱";
                 stars = 1;
             }
 
-            // Render Bintang Animasi
             starsContainer.innerHTML = '';
             for(let i=0; i<3; i++) {
                 if (i < stars) {
-                    starsContainer.innerHTML += `<span class="animate-bounce-in" style="animation-delay: ${0.5 + (i*0.3)}s">⭐</span>`;
+                    starsContainer.innerHTML += `<span class="animate-bounce-in drop-shadow-md text-yellow-400" style="animation-delay: ${0.5 + (i*0.3)}s">⭐</span>`;
                 } else {
                     starsContainer.innerHTML += `<span class="opacity-30 grayscale transform scale-75">⭐</span>`;
                 }
